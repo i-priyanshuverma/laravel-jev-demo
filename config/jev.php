@@ -58,8 +58,8 @@ return [
     */
     'cache' => [
         'enabled' => (bool) env('JEV_CACHE_ENABLED', false),
-        'ttl'     => (int) env('JEV_CACHE_TTL', 3600), // In seconds
-        'store'   => env('JEV_CACHE_STORE'), // null for default cache driver
+        'ttl' => (int) env('JEV_CACHE_TTL', 3600), // In seconds
+        'store' => env('JEV_CACHE_STORE'), // null for default cache driver
     ],
 
 ];
