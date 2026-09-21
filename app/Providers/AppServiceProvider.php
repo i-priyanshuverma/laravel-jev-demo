@@ -1,8 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
+use App\Services\DemoJevManager;
 use Illuminate\Support\ServiceProvider;
+use Priyanshu\LaravelJev\Facades\Jev;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -12,7 +16,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton('jev', function ($app) {
-            return new \App\Services\DemoJevManager($app);
+            return new DemoJevManager($app);
         });
     }
 
@@ -24,8 +28,8 @@ class AppServiceProvider extends ServiceProvider
         $simulate = (bool) config('jev.simulate', env('JEV_SIMULATE', true))
             || empty(config('jev.api_key'));
 
-        if ($simulate && ! \Priyanshu\LaravelJev\Facades\Jev::isFaking()) {
-            \Priyanshu\LaravelJev\Facades\Jev::fake();
+        if ($simulate && ! Jev::isFaking()) {
+            Jev::fake();
         }
     }
 }

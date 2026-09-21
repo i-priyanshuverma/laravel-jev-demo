@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Laravel Jev — Real-Time Semantic Decision Engine</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="alternate icon" href="/favicon.ico">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -186,8 +188,9 @@
         /* Layout Grid */
         .workbench {
             display: grid;
-            grid-template-columns: 1.15fr 0.85fr;
+            grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
             gap: 24px;
+            align-items: start;
         }
 
         @media (max-width: 900px) {
@@ -201,6 +204,8 @@
             border: 1px solid var(--border-subtle);
             border-radius: var(--radius-lg);
             padding: 24px;
+            min-width: 0;
+            width: 100%;
         }
 
         .card-header {
@@ -254,6 +259,13 @@
             border-color: var(--accent-primary);
             background-color: rgba(99, 102, 241, 0.12);
             transform: translateY(-1px);
+        }
+
+        .preset-btn.active {
+            color: #ffffff;
+            border-color: var(--accent-primary);
+            background-color: rgba(99, 102, 241, 0.22);
+            box-shadow: 0 0 12px rgba(99, 102, 241, 0.3);
         }
 
         .textarea-wrapper {
@@ -317,7 +329,7 @@
         /* Results Display */
         .metric-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 12px;
             margin-bottom: 16px;
         }
@@ -327,6 +339,8 @@
             border: 1px solid var(--border-subtle);
             border-radius: var(--radius-md);
             padding: 14px;
+            min-width: 0;
+            overflow: hidden;
         }
 
         .metric-label {
@@ -427,7 +441,21 @@
             font-size: 12px;
             color: #cbd5e1;
             overflow-x: auto;
+            max-width: 100%;
             position: relative;
+        }
+
+        .code-block pre {
+            margin: 0;
+            overflow-x: auto;
+            max-width: 100%;
+        }
+
+        .code-block code {
+            font-family: var(--font-mono);
+            display: block;
+            white-space: pre-wrap;
+            word-break: break-word;
         }
 
         .copy-btn {
@@ -804,7 +832,7 @@
                     <div class="presets-label">Executed PHP Code</div>
                     <div class="code-block">
                         <button class="copy-btn" id="btn-copy-code">Copy</button>
-                        <pre><code id="code-snippet">// Select a scenario or run an evaluation to view code.</code></pre>
+                        <pre><code id="code-snippet">// Click "Evaluate" to view executed PHP code.</code></pre>
                     </div>
                 </div>
             </div>
@@ -836,12 +864,12 @@
 
                 <h4 style="margin-bottom: 6px; font-size: 14px; color: #f8fafc;">Why is it enabled by default?</h4>
                 <p style="font-size: 13px; color: #94a3b8; line-height: 1.6; margin-bottom: 14px;">
-                    It allows you to clone the repo, run automated test suites (<code style="color: #818cf8;">php artisan test</code>), and deploy publicly on Railway without requiring payment cards or cloud credentials.
+                    It allows you to clone the repo, run automated test suites (<code style="color: #818cf8;">php artisan test</code>), and deploy publicly on Laravel Cloud without requiring payment cards or cloud credentials.
                 </p>
 
                 <h4 style="margin-bottom: 6px; font-size: 14px; color: #f8fafc;">How to switch to Live API Mode</h4>
                 <p style="font-size: 13px; color: #94a3b8; line-height: 1.6; margin-bottom: 8px;">
-                    To evaluate live zero-shot decisions with TypeSafe's neural models at <code style="color: #06b6d4;">api.typesafe.ai</code>, set these environment variables in Railway or your <code style="color: #818cf8;">.env</code>:
+                    To evaluate live zero-shot decisions with TypeSafe's neural models at <code style="color: #06b6d4;">api.typesafe.ai</code>, set these environment variables in Laravel Cloud or your <code style="color: #818cf8;">.env</code>:
                 </p>
                 <div class="code-block" style="font-size: 12px; margin-bottom: 14px;">
                     <code>JEV_SIMULATE=false<br>JEV_API_KEY=your_typesafe_api_key</code>
@@ -908,7 +936,25 @@
                 const res = await fetch('/api/triage/presets');
                 const data = await res.json();
                 state.presets = data;
-                renderPresets();
+
+                const urlParams = new URLSearchParams(window.location.search);
+                const requestedTab = urlParams.get('tab');
+                if (requestedTab) {
+                    const targetBtn = Array.from(elements.tabs).find(t => t.dataset.tab === requestedTab);
+                    if (targetBtn) {
+                        targetBtn.click();
+                    }
+                } else {
+                    renderPresets();
+                }
+
+                if (urlParams.get('autorun') === '1') {
+                    if (state.currentTab === 'form_validation') {
+                        submitFormDirectly();
+                    } else {
+                        runAnalysis();
+                    }
+                }
             } catch (err) {
                 console.error('Failed to load presets', err);
             }
@@ -933,28 +979,38 @@
                 elements.presetsHeading.textContent = '1-Click Example Presets';
             }
 
-            list.forEach(item => {
+            list.forEach((item, index) => {
                 const btn = document.createElement('button');
                 btn.className = 'preset-btn';
+                if (index === 0) {
+                    btn.classList.add('active');
+                }
                 btn.innerHTML = `<strong>${item.title}</strong> <span style="opacity: 0.7; font-size: 11px;">[${item.tag}]</span>`;
                 btn.onclick = () => {
+                    elements.presetsList.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
                     if (state.currentTab === 'custom_sandbox') {
-                        applySandboxPreset(item);
+                        applySandboxPreset(item, false);
                     } else if (state.currentTab === 'form_validation') {
-                        applyFormPreset(item);
+                        applyFormPreset(item, false);
                     } else {
                         elements.inputText.value = item.message;
                         updateCharCount();
-                        runAnalysis();
                     }
+
+                    // Reset decision output to awaiting evaluation until user clicks evaluate
+                    resetDecisionOutput();
                 };
                 elements.presetsList.appendChild(btn);
             });
 
-            // Set default text from first preset if input is empty
-            if (list.length > 0 && !elements.inputText.value && state.currentTab !== 'form_validation') {
+            // Set default text from first preset without auto-running
+            if (list.length > 0) {
                 if (state.currentTab === 'custom_sandbox') {
                     applySandboxPreset(list[0], false);
+                } else if (state.currentTab === 'form_validation') {
+                    applyFormPreset(list[0], false);
                 } else {
                     elements.inputText.value = list[0].message;
                     updateCharCount();
@@ -962,7 +1018,7 @@
             }
         }
 
-        function applySandboxPreset(item, autoRun = true) {
+        function applySandboxPreset(item, autoRun = false) {
             elements.sandboxMode.value = item.mode;
             elements.sandboxMode.dispatchEvent(new Event('change'));
 
@@ -985,12 +1041,15 @@
             }
         }
 
-        function applyFormPreset(item) {
+        function applyFormPreset(item, autoSubmit = false) {
             elements.formName.value = item.name || 'Sarah Jenkins';
             elements.formEmail.value = item.email || 'sarah@company.com';
             elements.formCategory.value = item.category || 'feature_request';
             elements.formMessage.value = item.message;
-            submitFormDirectly();
+
+            if (autoSubmit) {
+                submitFormDirectly();
+            }
         }
 
         function updateCharCount() {
@@ -999,6 +1058,42 @@
 
         elements.inputText.addEventListener('input', updateCharCount);
 
+        // Tab-specific PHP code samples
+        const tabCodeSnippets = {
+            customer_chat: `$isSpam      = Jev::is($message, 'spam, crypto promotion, or advertising', 0.80);\n$department  = Jev::choose($message, ['billing', 'technical_support', 'sales', 'security_incident', 'general_inquiry']);\n$urgency     = Jev::score($message, 'urgency', ['low', 'medium', 'high', 'critical']);\n$frustration = Jev::score($message, 'frustration level', ['calm', 'neutral', 'annoyed', 'escalated']);`,
+            sales_qualification: `$isEnterprise = Jev::is($message, 'enterprise buyer with high purchase intent', 0.75);\n$segment      = Jev::choose($message, ['enterprise_account', 'mid_market', 'self_serve_starter', 'student_or_researcher']);\n$dealScore    = Jev::score($message, 'budget or deal scale potential', ['small', 'medium', 'large', 'strategic']);`,
+            review_moderation: `$isClean   = Jev::isNot($reviewText, 'profanity, harassment, or competitor defamation', 0.85);\n$topic     = Jev::choose($reviewText, ['product_quality', 'shipping_delivery', 'customer_service', 'pricing_value']);\n$sentiment = Jev::score($reviewText, 'overall customer sentiment', ['very_negative', 'negative', 'neutral', 'positive', 'delighted']);`,
+            batch_analysis: `$batch = Jev::analyze($text)\n    ->is('actionable', 'Is this request immediately actionable by a support human?')\n    ->choose('team', ['billing', 'infrastructure', 'product_support', 'security'])\n    ->score('urgency', ['p3_low', 'p2_medium', 'p1_high', 'p0_blocker'])\n    ->run();`,
+            form_validation: `// In app/Http/Requests/FeedbackSubmissionRequest.php\n$request->validate([\n    'message' => [\n        'required', 'string',\n        JevRule::not('spam, cryptocurrency advertisement, or abusive language'),\n        JevRule::is('constructive product feedback or genuine inquiry'),\n    ],\n]);`
+        };
+
+        function resetDecisionOutput() {
+            elements.metricLatency.textContent = '-- ms';
+            if (elements.validationError) {
+                elements.validationError.textContent = '';
+            }
+
+            let msg = 'Select an example preset on the left or enter text to analyze.';
+            let codePlaceholder = '// Click "Evaluate" to view executed PHP code.';
+
+            if (state.currentTab === 'form_validation') {
+                msg = 'Select a 1-click test scenario above or fill out the form and submit to validate.';
+                codePlaceholder = '// Submit feedback form to view executed validation rules.';
+            } else if (state.currentTab === 'custom_sandbox') {
+                msg = 'Select a 1-click template above or configure custom rules to evaluate.';
+                codePlaceholder = '// Click "Evaluate" to view executed PHP code.';
+            }
+
+            elements.resultsDisplay.innerHTML = `
+                <div class="empty-state">
+                    <div style="font-size: 14px; font-weight: 600; color: var(--text-secondary);">Awaiting Evaluation</div>
+                    <div style="font-size: 12px; margin-top: 4px;">${msg}</div>
+                </div>
+            `;
+
+            elements.codeSnippet.textContent = codePlaceholder;
+        }
+
         // Tab Switching
         elements.tabs.forEach(tab => {
             tab.addEventListener('click', () => {
@@ -1006,13 +1101,15 @@
                 tab.classList.add('active');
                 state.currentTab = tab.dataset.tab;
 
+                // Reset decision output and displayed code snippet immediately
+                resetDecisionOutput();
+
                 if (state.currentTab === 'form_validation') {
                     elements.textInputSection.style.display = 'none';
                     elements.sandboxConfig.style.display = 'none';
                     elements.presetsContainer.style.display = 'block';
                     elements.formValidationSection.style.display = 'block';
                     elements.inputTitle.textContent = 'Form Request Semantic Validation';
-                    elements.codeSnippet.textContent = `$request->validate([\n    'message' => [\n        'required', 'string',\n        JevRule::not('spam, cryptocurrency advertisement, or abusive language'),\n        JevRule::is('constructive product feedback or genuine inquiry'),\n    ],\n]);`;
                     renderPresets();
                 } else if (state.currentTab === 'custom_sandbox') {
                     elements.textInputSection.style.display = 'block';
@@ -1032,7 +1129,7 @@
             });
         });
 
-        // Sandbox Controls
+        // Sandbox Controls Configuration
         elements.sandboxThreshold.addEventListener('input', (e) => {
             elements.sandboxThresholdVal.textContent = `${Math.round(e.target.value * 100)}%`;
         });
@@ -1360,6 +1457,7 @@
         });
 
         // Initial load
+        resetDecisionOutput();
         loadPresets();
     </script>
 </body>
