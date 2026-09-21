@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "947b6db1b50b2c1a56615cc0aac08744",
+    "content-hash": "d7421342587945f83e64dfa21654abef",
     "packages": [
         {
             "name": "brick/math",
@@ -1065,11 +1065,17 @@
         },
         {
             "name": "i-priyanshuverma/laravel-jev",
-            "version": "dev-main",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/i-priyanshuverma/laravel-jev.git",
+                "reference": "fa3af1ba0edec465f928a13eba689fccfb64d570"
+            },
             "dist": {
-                "type": "path",
-                "url": "../laravel-jev",
-                "reference": "7b6155d695cbe1221f63c256d69518548dfc3dde"
+                "type": "zip",
+                "url": "https://api.github.com/repos/i-priyanshuverma/laravel-jev/zipball/fa3af1ba0edec465f928a13eba689fccfb64d570",
+                "reference": "fa3af1ba0edec465f928a13eba689fccfb64d570",
+                "shasum": ""
             },
             "require": {
                 "illuminate/contracts": "^10.0|^11.0|^12.0|^13.0",
@@ -1137,10 +1143,7 @@
                 "issues": "https://github.com/i-priyanshuverma/laravel-jev/issues",
                 "source": "https://github.com/i-priyanshuverma/laravel-jev"
             },
-            "transport-options": {
-                "symlink": true,
-                "relative": true
-            }
+            "time": "2026-09-20T16:41:20+00:00"
         },
         {
             "name": "laravel/framework",
@@ -6380,16 +6383,16 @@
         },
         {
             "name": "laravel/pint",
-            "version": "v1.32.1",
+            "version": "v1.24.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/pint.git",
-                "reference": "006bd7825eb01daf92959d060b89cd9514fe4253"
+                "reference": "0345f3b05f136801af8c339f9d16ef29e6b4df8a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/pint/zipball/006bd7825eb01daf92959d060b89cd9514fe4253",
-                "reference": "006bd7825eb01daf92959d060b89cd9514fe4253",
+                "url": "https://api.github.com/repos/laravel/pint/zipball/0345f3b05f136801af8c339f9d16ef29e6b4df8a",
+                "reference": "0345f3b05f136801af8c339f9d16ef29e6b4df8a",
                 "shasum": ""
             },
             "require": {
@@ -6397,25 +6400,25 @@
                 "ext-mbstring": "*",
                 "ext-tokenizer": "*",
                 "ext-xml": "*",
-                "php": "^8.3.0"
+                "php": "^8.2.0"
             },
             "require-dev": {
-                "composer/semver": "^3.4.4",
-                "friendsofphp/php-cs-fixer": "^3.95.25",
-                "illuminate/view": "^13.31.0",
-                "larastan/larastan": "^3.11.0",
-                "laravel-zero/framework": "^13.0.0",
-                "laravel/agent-detector": "^2.0.2",
-                "laravel/prompts": "^0.3.24",
-                "mockery/mockery": "^1.6.15",
-                "nunomaduro/termwind": "^2.4.0",
-                "pestphp/pest": "^4.7.8"
+                "friendsofphp/php-cs-fixer": "^3.82.2",
+                "illuminate/view": "^11.45.1",
+                "larastan/larastan": "^3.5.0",
+                "laravel-zero/framework": "^11.45.0",
+                "mockery/mockery": "^1.6.12",
+                "nunomaduro/termwind": "^2.3.1",
+                "pestphp/pest": "^2.36.0"
             },
             "bin": [
                 "builds/pint"
             ],
             "type": "project",
             "autoload": {
+                "files": [
+                    "overrides/Runner/Parallel/ProcessFactory.php"
+                ],
                 "psr-4": {
                     "App\\": "app/",
                     "Database\\Seeders\\": "database/seeders/",
@@ -6435,7 +6438,6 @@
             "description": "An opinionated code formatter for PHP.",
             "homepage": "https://laravel.com",
             "keywords": [
-                "dev",
                 "format",
                 "formatter",
                 "lint",
@@ -6446,7 +6448,7 @@
                 "issues": "https://github.com/laravel/pint/issues",
                 "source": "https://github.com/laravel/pint"
             },
-            "time": "2026-09-10T10:47:55+00:00"
+            "time": "2025-07-10T18:09:32+00:00"
         },
         {
             "name": "laravel/sail",
@@ -8484,5 +8486,8 @@
         "php": "^8.2"
     },
     "platform-dev": {},
+    "platform-overrides": {
+        "php": "8.2.0"
+    },
     "plugin-api-version": "2.9.0"
 }

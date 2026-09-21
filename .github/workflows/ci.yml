@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  code-style:
+    name: Code Style (Laravel Pint)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: pint
+          coverage: none
+
+      - name: Run Pint
+        run: pint --test
+
+  tests:
+    name: Tests (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.2', '8.3']
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, xml, ctype, curl, sqlite3, pdo_sqlite, tokenizer
+          coverage: none
+
+      - name: Cache Composer Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache/files
+          key: composer-${{ matrix.php }}-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            composer-${{ matrix.php }}-
+
+      - name: Validate Composer Configuration
+        run: composer validate
+
+      - name: Install Dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Setup Environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Run Test Suite
+        run: php artisan test
+
+      - name: Verify Production Cache Optimization
+        run: |
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
