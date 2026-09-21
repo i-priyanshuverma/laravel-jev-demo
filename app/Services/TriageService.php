@@ -15,7 +15,7 @@ class TriageService
             || empty(config('jev.api_key'));
 
         if ($this->simulate && ! Jev::isFaking()) {
-            $this->bootSimulation();
+            Jev::fake();
         }
     }
 
@@ -232,44 +232,5 @@ PHP,
             'code_sample' => $code,
             'simulated' => $this->simulate,
         ];
-    }
-
-    /**
-     * Setup offline fakes for simulation mode.
-     */
-    protected function bootSimulation(): void
-    {
-        Jev::fake([
-            // Support chat patterns
-            'urgent production db down' => [
-                'is:spam' => false,
-                'choose:team' => 'technical_support',
-                'choose:department' => 'technical_support',
-                'score:urgency' => 0.95,
-                'score:frustration' => 0.88,
-            ],
-            'bitcoin giveaway claim 100 free crypto' => [
-                'is:spam' => true,
-                'choose:team' => 'security_incident',
-                'choose:department' => 'security_incident',
-                'score:urgency' => 0.10,
-                'score:frustration' => 0.05,
-            ],
-            'invoice question overcharge on monthly renewal' => [
-                'is:spam' => false,
-                'choose:team' => 'billing',
-                'choose:department' => 'billing',
-                'score:urgency' => 0.72,
-                'score:frustration' => 0.65,
-            ],
-            'enterprise inquiry looking for 500 seat contract' => [
-                'is:spam' => false,
-                'choose:team' => 'sales',
-                'choose:segment' => 'enterprise_account',
-                'choose:department' => 'sales',
-                'score:urgency' => 0.60,
-                'score:deal' => 0.90,
-            ],
-        ]);
     }
 }
