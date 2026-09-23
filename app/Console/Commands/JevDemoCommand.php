@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Enums\TriageScenario;
 use App\Services\TriageService;
 use Illuminate\Console\Command;
 
@@ -23,42 +24,36 @@ class JevDemoCommand extends Command
     {
         intro('Laravel Jev Decision Engine Demo');
 
-        $scenario = select(
-            label: 'Select evaluation scenario:',
-            options: [
-                'customer_chat' => 'Customer Support Triage',
-                'sales_qualification' => 'Lead Qualification',
-                'review_moderation' => 'Review & Content Moderation',
-                'batch_analysis' => 'Single Round-Trip Batch Analysis',
-                'custom' => 'Custom Rule Sandbox',
-            ],
-            default: 'customer_chat'
+        $options = array_merge(
+            TriageScenario::options(),
+            ['custom' => 'Custom Rule Sandbox']
         );
 
-        if ($scenario === 'custom') {
+        $selected = select(
+            label: 'Select evaluation scenario:',
+            options: $options,
+            default: TriageScenario::CustomerChat->value
+        );
+
+        if ($selected === 'custom') {
             $this->runCustomSandbox($triage);
 
             return self::SUCCESS;
         }
 
-        $defaultMessage = match ($scenario) {
-            'customer_chat' => 'Our production database crashed and returning 500 errors on checkout. Please escalate!',
-            'sales_qualification' => 'We are evaluating your platform for our 500 engineers. Looking for enterprise pricing.',
-            'review_moderation' => 'THIS PRODUCT IS A COMPLETE SCAM DO NOT BUY FROM THESE THIEVES.',
-            'batch_analysis' => 'Customer card renewal failed. Account past due 3 days. Send dunning notice.',
-        };
+        $scenario = TriageScenario::from($selected);
 
         $input = text(
             label: 'Enter input text to evaluate:',
-            default: $defaultMessage,
+            default: $scenario->defaultMessage(),
             required: true
         );
 
         $result = match ($scenario) {
-            'customer_chat' => $triage->triageCustomerChat($input),
-            'sales_qualification' => $triage->qualifySalesLead($input),
-            'review_moderation' => $triage->moderateReview($input),
-            'batch_analysis' => $triage->executeBatch($input),
+            TriageScenario::CustomerChat => $triage->triageCustomerChat($input),
+            TriageScenario::SalesQualification => $triage->qualifySalesLead($input),
+            TriageScenario::ReviewModeration => $triage->moderateReview($input),
+            TriageScenario::BatchAnalysis => $triage->executeBatch($input),
         };
 
         $rows = [];

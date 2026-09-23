@@ -41,7 +41,7 @@ class TriageTest extends TestCase
 
     public function test_it_returns_triage_dashboard_view(): void
     {
-        $response = $this->get('/');
+        $response = $this->get(route('console'));
 
         $response->assertStatus(200);
         $response->assertSee('Laravel Jev Operations Console');
@@ -50,7 +50,7 @@ class TriageTest extends TestCase
 
     public function test_it_returns_presets_list(): void
     {
-        $response = $this->getJson('/api/triage/presets');
+        $response = $this->getJson(route('api.triage.presets'));
 
         $response->assertStatus(200)
             ->assertJsonStructure([
@@ -63,7 +63,7 @@ class TriageTest extends TestCase
 
     public function test_it_analyzes_customer_chat_scenario(): void
     {
-        $response = $this->postJson('/api/triage/analyze', [
+        $response = $this->postJson(route('api.triage.analyze'), [
             'scenario' => 'customer_chat',
             'input' => 'Our production database crashed and returning 500 errors on checkout.',
         ]);
@@ -86,7 +86,7 @@ class TriageTest extends TestCase
 
     public function test_it_qualifies_sales_lead_scenario(): void
     {
-        $response = $this->postJson('/api/triage/analyze', [
+        $response = $this->postJson(route('api.triage.analyze'), [
             'scenario' => 'sales_qualification',
             'input' => 'Looking to purchase 500 enterprise seats for our engineering team.',
         ]);
@@ -106,7 +106,7 @@ class TriageTest extends TestCase
 
     public function test_it_moderates_content_reviews(): void
     {
-        $response = $this->postJson('/api/triage/analyze', [
+        $response = $this->postJson(route('api.triage.analyze'), [
             'scenario' => 'review_moderation',
             'input' => 'This package reduced our response latency by 80%. Highly recommended!',
         ]);
@@ -126,7 +126,7 @@ class TriageTest extends TestCase
 
     public function test_it_executes_batch_analysis_with_single_roundtrip(): void
     {
-        $response = $this->postJson('/api/triage/analyze', [
+        $response = $this->postJson(route('api.triage.analyze'), [
             'scenario' => 'batch_analysis',
             'input' => 'Customer payment failed. Account past due 3 days. Send dunning notice.',
         ]);
@@ -139,7 +139,7 @@ class TriageTest extends TestCase
 
     public function test_it_evaluates_custom_sandbox(): void
     {
-        $response = $this->postJson('/api/triage/sandbox', [
+        $response = $this->postJson(route('api.triage.sandbox'), [
             'input' => 'Can you please issue a refund for order #99402?',
             'mode' => 'boolean',
             'params' => [
@@ -189,7 +189,7 @@ class TriageTest extends TestCase
             'is:constructive product feedback or genuine inquiry' => false,
         ]);
 
-        $response = $this->postJson('/api/feedback/submit', [
+        $response = $this->postJson(route('api.feedback.submit'), [
             'name' => 'Spam Bot',
             'email' => 'bot@spammer.xyz',
             'category' => 'general_feedback',
@@ -198,5 +198,27 @@ class TriageTest extends TestCase
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['message']);
+    }
+
+    public function test_analyze_fails_validation_with_invalid_scenario(): void
+    {
+        $response = $this->postJson(route('api.triage.analyze'), [
+            'scenario' => 'unknown_scenario',
+            'input' => 'Some test message here',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['scenario']);
+    }
+
+    public function test_sandbox_fails_validation_with_invalid_mode(): void
+    {
+        $response = $this->postJson(route('api.triage.sandbox'), [
+            'input' => 'Some test input',
+            'mode' => 'unsupported_mode',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['mode']);
     }
 }
