@@ -156,17 +156,25 @@ This demo demonstrates clean architectural patterns for integrating Jev into a L
 app/
 ├── Console/Commands/
 │   └── JevDemoCommand.php             # Interactive terminal walkthrough (php artisan jev:demo)
+├── Enums/
+│   └── TriageScenario.php             # Backed enum for triage scenario identifiers
 ├── Http/
 │   ├── Controllers/
 │   │   └── TriageController.php       # JSON API endpoints for the web console
 │   └── Requests/
+│       ├── AnalyzeScenarioRequest.php # Dedicated Form Request validating scenario & prompt
+│       ├── CustomSandboxRequest.php   # Dedicated Form Request validating sandbox mode & rules
 │       └── FeedbackSubmissionRequest.php # Form Request with JevRule validation
-└── Services/
-    └── TriageService.php              # Service layer encapsulating Jev decision logic & fakes
+├── Services/
+│   ├── DemoJevFake.php                # Heuristic offline simulation engine extending JevFake
+│   ├── DemoJevManager.php             # Custom JevManager supporting simulation overrides
+│   └── TriageService.php              # Service layer encapsulating Jev decision logic & fakes
+└── Support/
+    └── PresetCatalog.php              # Centralized repository of demonstration presets & test prompts
 resources/views/
 └── triage.blade.php                   # Single-file operations console UI (vanilla CSS & JS)
 tests/Feature/
-└── TriageTest.php                     # 11 automated feature tests covering all scenarios
+└── TriageTest.php                     # 13 automated feature tests covering all scenarios & validation rules
 ```
 
 ---
@@ -211,7 +219,7 @@ vendor/bin/pint --test
 
 ## Simulation vs. Live API Mode
 
-By default, the application runs with an offline simulation driver (`Jev::fake()`), configured in `TriageService`. This allows exploring the console, running the CLI, and executing the test suite without an external API key.
+By default, the application runs with an offline simulation driver (`Jev::fake()`), configured via `config('jev.simulate')` in `config/jev.php`. This allows exploring the console, running the CLI, and executing the test suite without an external API key.
 
 To connect to the live TypeSafe Jev API:
 1. Obtain an API key from [TypeSafe](https://typesafe.ai).
