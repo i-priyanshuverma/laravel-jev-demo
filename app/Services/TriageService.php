@@ -11,12 +11,8 @@ class TriageService
     public function __construct(
         protected bool $simulate = false
     ) {
-        $this->simulate = (bool) config('jev.simulate', env('JEV_SIMULATE', true))
+        $this->simulate = (bool) config('jev.simulate', true)
             || empty(config('jev.api_key'));
-
-        if ($this->simulate && ! Jev::isFaking()) {
-            Jev::fake();
-        }
     }
 
     /**

@@ -15,6 +15,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Simulation Driver Mode
+    |--------------------------------------------------------------------------
+    |
+    | When set to true (or when no API key is provided), the application uses
+    | an in-memory heuristic simulation driver for local testing and demos.
+    |
+    */
+    'simulate' => (bool) env('JEV_SIMULATE', true),
+
+    /*
+    |--------------------------------------------------------------------------
     | Base API URL
     |--------------------------------------------------------------------------
     |
