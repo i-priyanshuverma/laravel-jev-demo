@@ -57,7 +57,7 @@ class DemoJevFake extends JevFake
     /**
      * Boolean classification: Does input match criteria?
      */
-    public function is(string $input, string $criteria, float $threshold = 0.80): bool
+    public function is(string $input, string $criteria, ?float $threshold = null): bool
     {
         $key = "is:{$criteria}";
 

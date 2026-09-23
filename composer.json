@@ -13,7 +13,7 @@
     ],
     "require": {
         "php": "^8.2",
-        "i-priyanshuverma/laravel-jev": "@dev",
+        "i-priyanshuverma/laravel-jev": "^1.1",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1"
     },

@@ -18,6 +18,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton('jev', function ($app) {
             return new DemoJevManager($app);
         });
+
+        $this->app->alias('jev', \Priyanshu\LaravelJev\Contracts\Jev::class);
     }
 
     /**
@@ -25,7 +27,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $simulate = (bool) config('jev.simulate', env('JEV_SIMULATE', true))
+        $simulate = (bool) config('jev.simulate', true)
             || empty(config('jev.api_key'));
 
         if ($simulate && ! Jev::isFaking()) {
