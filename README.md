@@ -1,13 +1,11 @@
 # Laravel Jev Demo Application
 
-[![Live Demo](https://img.shields.io/badge/Demo-laravel--jev--demo.laravel.cloud-6366f1?style=flat-square&logo=laravel)](https://laravel-jev-demo.laravel.cloud/)
 [![Laravel 12](https://img.shields.io/badge/Laravel-12.x-FF2D20?style=flat-square&logo=laravel)](https://laravel.com)
 [![PHP 8.3](https://img.shields.io/badge/PHP-8.3-777BB4?style=flat-square&logo=php)](https://php.net)
+[![laravel-jev](https://img.shields.io/badge/laravel--jev-v1.1.0-6366f1?style=flat-square)](https://packagist.org/packages/i-priyanshuverma/laravel-jev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 
 A reference application demonstrating real-world implementations of the **[laravel-jev](https://github.com/i-priyanshuverma/laravel-jev)** package in a modern Laravel 12 codebase.
-
-> 🚀 **Live Interactive Demo**: [https://laravel-jev-demo.laravel.cloud/](https://laravel-jev-demo.laravel.cloud/)
 
 <p align="center">
   <img src="art/console-preview.png" alt="Laravel Jev Operations Console" width="100%">
@@ -195,7 +193,7 @@ composer install
 php artisan serve
 ```
 
-Open `http://localhost:8000` to access the operations console (or visit the [live deployment](https://laravel-jev-demo.laravel.cloud/)).
+Open `http://localhost:8000` to access the operations console.
 
 ### Running the Terminal CLI
 
